@@ -1,0 +1,33 @@
+name: Fetch Dune Data Daily
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch-and-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Fetch data from Dune
+        run: |
+          curl -H "x-dune-api-key: ${{ secrets.DUNE_API_KEY }}" \
+            "https://api.dune.com/api/v1/query/6136868/results?limit=1000" \
+            -o dune-response.json
+          
+          cat dune-response.json | jq '{
+            value: .result.rows[0].value,
+            updated: now | strftime("%Y-%m-%d %H:%M:%S UTC")
+          }' > data.json
+          
+          cat data.json
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add data.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update Dune data $(date)" && git push)
