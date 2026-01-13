@@ -1,9 +1,11 @@
+# .github/workflows/fetch-dune-data.yml
 name: Fetch Dune Data Daily
 
 on:
   schedule:
+    # Runs daily at 1 AM UTC (adjust as needed)
     - cron: '0 1 * * *'
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual trigger
 
 jobs:
   fetch-and-update:
@@ -14,15 +16,24 @@ jobs:
 
       - name: Fetch data from Dune
         run: |
+          # Fetch data from Dune API
           curl -H "x-dune-api-key: ${{ secrets.DUNE_API_KEY }}" \
             "https://api.dune.com/api/v1/query/6136868/results?limit=1000" \
             -o dune-response.json
-          
+
+          # Display the full response to debug
+          echo "=== FULL DUNE RESPONSE ==="
+          cat dune-response.json | jq '.'
+          echo "=========================="
+
+          # Try to extract the value (this will likely still be null, but we'll see the structure above)
           cat dune-response.json | jq '{
-            value: .result.rows[0].value,
+            value: .result.rows[0],
             updated: now | strftime("%Y-%m-%d %H:%M:%S UTC")
           }' > data.json
-          
+
+          # Display what was extracted
+          echo "=== EXTRACTED DATA ==="
           cat data.json
 
       - name: Commit and push if changed
