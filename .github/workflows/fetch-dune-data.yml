@@ -21,14 +21,9 @@ jobs:
             "https://api.dune.com/api/v1/query/6136868/results?limit=1000" \
             -o dune-response.json
 
-          # Display the full response to debug
-          echo "=== FULL DUNE RESPONSE ==="
-          cat dune-response.json | jq '.'
-          echo "=========================="
-
-          # Try to extract the value (this will likely still be null, but we'll see the structure above)
+          # Extract the volume value
           cat dune-response.json | jq '{
-            value: .result.rows[0],
+            value: .result.rows[0].volume,
             updated: now | strftime("%Y-%m-%d %H:%M:%S UTC")
           }' > data.json
 
