@@ -3,7 +3,7 @@ name: Fetch Dune Data Daily
 
 on:
   schedule:
-    # Runs daily at 1 AM UTC (adjust as needed)
+    # Runs daily at 10 30 UTC (adjust as needed)
     - cron: '30 10 * * *'
   workflow_dispatch: # Allows manual trigger
 
